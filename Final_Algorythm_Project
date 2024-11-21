@@ -1,0 +1,329 @@
+/*Details: This file is to follow the guidelines for TU 857 algorithyms project, Creates and sorts logs troughout the project
+Author: Eoin Kenny
+Date: 30/03/2024*/
+
+//header files
+//
+#include <stdio.h>
+#include <stdlib.h>
+
+//symbolic names
+//
+#define SIZE 5
+#define MERGELOG 4
+
+//structure containt log info
+//
+typedef struct 
+{
+    int ProductID;
+    int IssueCode;
+    int Year;
+    int Month;
+    int Day;
+    int Hour;
+    int Minute;
+} Log;
+
+//function signatures
+//
+void merge(Log arr[], int l, int m, int r);
+void mergeSort(Log arr[], int l, int r);
+int IssueCodeFind(Log arr[], int size, int issuecode);
+int getTotalIssues(Log logs[][SIZE], int productId);
+
+
+void merge(Log arr[], int l, int m, int r) 
+{
+    //Intatlizing variables
+    //
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 = r - m;
+
+    //Assining log to two arrays, left and right
+    //
+    Log L[n1], R[n2];
+
+    //Assiging data to the temporary arrays
+    //
+    for (i = 0; i < n1; i++)
+        L[i] = arr[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = arr[m + 1 + j];
+
+
+    //Setting index for the subarrays7
+    //
+    i = 0;
+    j = 0;
+    k = l; 
+    
+    //merge the temporay arrays back into the main array
+    //
+    while (i < n1 && j < n2) 
+    {
+        //comparing product ID of elements from the left array and right array
+        //
+        if (L[i].ProductID < R[j].ProductID) 
+        {
+            arr[k] = L[i];
+            i++;
+        } 
+        //if product id is equal then move to check if issue code is equal
+        //
+        else if (L[i].ProductID == R[j].ProductID) 
+        {
+            if (L[i].IssueCode < R[j].IssueCode || (L[i].IssueCode == R[j].IssueCode && (L[i].Year < R[j].Year || //comparing issue code 
+                  (L[i].Year == R[j].Year && L[i].Month < R[j].Month) ||//comparing year and month
+                  (L[i].Year == R[j].Year && L[i].Month == R[j].Month && L[i].Day < R[j].Day) ||//comparing month and day
+                  (L[i].Year == R[j].Year && L[i].Month == R[j].Month && L[i].Day == R[j].Day && L[i].Hour < R[j].Hour) ||//comparing day and hour
+                  (L[i].Year == R[j].Year && L[i].Month == R[j].Month && L[i].Day == R[j].Day && L[i].Hour == R[j].Hour && L[i].Minute < R[j].Minute))))//comparing hour and minuyte
+            {
+                arr[k] = L[i];//moving the left index to arr[k]
+                i++;
+            } 
+            else   
+            {
+                arr[k] = R[j];//moving the right inded to array[k]
+                j++;
+            }
+        } 
+        else 
+        {
+            arr[k] = R[j];//copy r[j] to array[k]
+            j++;
+        }
+        k++;
+    }
+
+    //copying over any remaing elements
+    //
+    while (i < n1) 
+    {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+    while (j < n2) 
+    {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+//function to implement the merge sort
+//
+void mergeSort(Log arr[], int l, int r) 
+{
+    if (l < r) //if left is bigger then right 
+    {
+        int m = l + (r - l) / 2;
+        mergeSort(arr, l, m);
+        mergeSort(arr, m + 1, r);
+        merge(arr, l, m, r);
+    }
+}
+
+
+//function for issue code search
+//
+int IssueCodeFind(Log array[],int size,int issuecode)
+{
+
+    int earliest_index = -1;//earliest index has to be -1
+    int i = 0;
+
+    for ( i = 0; i < size; i++)
+    {
+        if (array[i].IssueCode == issuecode) 
+        {
+            earliest_index = i;
+            break;//used when earliest report is found and is neccesary to break out of the loop
+        }
+    }
+
+    return earliest_index;//pass the earliest index
+
+}
+
+//function used to get the total number of issues reported with a product id
+//
+int getTotalIssues(Log Logs[][SIZE], int productid)
+{
+
+    //declaring varaibles
+    //
+    int totalissues=0;
+    int i = 0;
+    int set = 0;
+
+    //for loop which calculets the total number of issues with a product ID
+    //
+    for (set = 0; set < MERGELOG; set++)
+    {
+        for ( i = 0; i < SIZE; i++)
+        {
+            if (Logs[set][i].ProductID == productid)
+            {
+                totalissues++;
+            }
+            
+        }
+        
+    }
+    
+    return totalissues;//return total issues to main
+    
+}
+    
+
+
+
+int main() 
+{
+    // Defining an array with 4 sets of information for the logs
+    //
+    Log logs[4][SIZE] = 
+    {
+        {
+            {1, 1000, 2023, 5, 10, 12, 30},
+            {2, 1001, 2023, 5, 11, 13, 45},
+            {3, 1002, 2023, 5, 12, 14, 15},
+            {4, 1003, 2023, 5, 13, 16, 20},
+            {5, 1004, 2023, 5, 14, 17, 10}
+        },
+        {
+            {1, 1000, 2023, 5, 15, 11, 25},
+            {2, 1001, 2023, 5, 16, 10, 35},
+            {3, 1002, 2023, 5, 17, 9, 45},
+            {4, 1003, 2023, 5, 18, 8, 55},
+            {5, 1004, 2023, 5, 19, 7, 5}
+        },
+        {
+            {1, 1000, 2023, 5, 20, 6, 15},
+            {2, 1001, 2023, 5, 21, 5, 25},
+            {3, 1002, 2023, 5, 22, 4, 35},
+            {4, 1003, 2023, 5, 23, 3, 45},
+            {5, 1004, 2023, 5, 24, 2, 55}
+        },
+        {
+            {1, 1000, 2023, 5, 25, 12, 0},
+            {2, 1001, 2023, 5, 26, 11, 0},
+            {3, 1002, 2023, 5, 27, 10, 0},
+            {4, 1003, 2023, 5, 28, 9, 0},
+            {5, 1004, 2023, 5, 29, 8, 0}
+        }
+    };
+
+    // printing out each set of logs
+    //
+    for (int set = 0; set < MERGELOG; set++) 
+    {
+        //sorting the logs for the current set
+        //
+        mergeSort(logs[set], 0, SIZE - 1); 
+
+        //Printing the header format for the logs
+        //
+        printf("Sorted by Date and Time - Set %d\n--------------------------\n", set + 1);
+        printf("Product ID\tIssue Code\tDate & Time\n");
+
+        // Print the logs for the current set
+        //
+        for (int i = 0; i < SIZE; i++) 
+        {
+            printf("%d\t\t%d\t\t%04d-%02d-%02d %02d:%02d\n", logs[set][i].ProductID, logs[set][i].IssueCode, logs[set][i].Year, logs[set][i].Month, logs[set][i].Day, logs[set][i].Hour, logs[set][i].Minute);
+        }
+
+        printf("\n");
+    }
+
+    //creating an array for the merged logs and setting the index as 0
+    //
+    Log mergedLogs[MERGELOG * SIZE]; 
+    int index = 0;
+
+    for (int set = 0; set < MERGELOG; set++) 
+    {
+        for (int i = 0; i < SIZE; i++) 
+        {
+            mergedLogs[index] = logs[set][i];
+            index++;
+        }
+    }
+
+    //calling merge sort function for the merged locks
+    //
+    mergeSort(mergedLogs, 0, MERGELOG * SIZE - 1);
+
+    //printing header for the merged logs
+    //A
+    printf("Merged Logs\n-------------------\n");
+    printf("Product ID\tIssue Code\tDate & Time\n");
+
+    //printing the merged logs(Using same format as single logs)
+    //
+    for (int i = 0; i < MERGELOG * SIZE; i++) 
+    {
+        printf("%d\t\t%d\t\t%04d-%02d-%02d %02d:%02d\n", mergedLogs[i].ProductID, mergedLogs[i].IssueCode, mergedLogs[i].Year, mergedLogs[i].Month, mergedLogs[i].Day, mergedLogs[i].Hour, mergedLogs[i].Minute);
+    }
+
+    //creating a variable for user input
+    //
+    int userIssueCode;
+
+    //user input
+    //
+    printf("\nEnter an issue code to find its earliest occurrence: \n");
+    scanf("%d", &userIssueCode);
+
+    //setting earliest index as -1 to print error if issue code isnt found
+    //
+    int earliestIndex = -1;
+
+    //for loop to print the earliest occurance of a issue code
+    //
+    for (int set = 0; set < MERGELOG; set++) 
+    {
+        earliestIndex = IssueCodeFind(logs[set], SIZE, userIssueCode);
+        if (earliestIndex != -1) 
+        {
+            printf("\nEarliest occurrence of issue code %d found at index %d in Set %d\n", userIssueCode, earliestIndex, set + 1);
+            printf("Product ID\tIssue Code\tDate & Time\n");
+            printf("%d\t\t%d\t\t%04d-%02d-%02d %02d:%02d\n", logs[set][earliestIndex].ProductID, logs[set][earliestIndex].IssueCode, logs[set][earliestIndex].Year, logs[set][earliestIndex].Month, logs[set][earliestIndex].Day, logs[set][earliestIndex].Hour, logs[set][earliestIndex].Minute);
+            break;
+        }
+    }
+
+    //if the user fails to enter a real issue code this code will excecte
+    //
+    if (earliestIndex == -1) 
+    {
+        printf("\nIssue code %d not found in any log set.\n", userIssueCode);
+    }
+
+    //printf for formatting purposes to sepperate tasks from each other
+    //
+    printf("\n\n---------------------\n\n");
+
+    //printf to print the total issues reported with the product ID's
+    //
+    printf("Product ID   Total Issues Reported\n---------------------------------\n");
+
+    //for loop to print the issues
+    //
+    for ( int productid = 1; productid <= SIZE; productid++)
+    {
+        //letting total isseues = to the total issues found for a product id
+        //
+        int totalIssues = getTotalIssues(logs, productid);
+        printf("%d\t\t%d\n", productid, totalIssues);
+    }
+    
+    //end of program
+    //
+    return 0;
+}
+
